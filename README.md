@@ -10,11 +10,28 @@ composer require latinexus/lx_bulmacss
 
 ## Uso
 
+Los helpers solo generan el HTML con las clases de Bulma; para que se vean los estilos hay que cargar el CSS
+en el `<head>`:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+```
+
+O hacerlo desde la clase con `cssLinks()` (también carga Font Awesome para los iconos):
+
 ```php
 use Lib\Grids\GridBulma;
 
 $bul = new GridBulma();
 
+echo $bul->cssLinks();
+echo $bul->bul_input("Nombre", "nombre");
+```
+
+Para una página completa con estilos ya incluidos: `echo $bul->page($contenido, "Título");`.
+Demo visual: `php -S localhost:8080 -t demo` y abrir <http://localhost:8080>.
+
+```php
 echo $bul->bul_input("Nombre", "nombre");
 ```
 

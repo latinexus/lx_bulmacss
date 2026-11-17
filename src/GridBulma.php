@@ -43,6 +43,58 @@ class GridBulma
 
     }
 
+    /** Versión de Bulma cargada por defecto por cssLinks() */
+    public const BULMA_VERSION = "1.0.4";
+
+    /**
+     * BULMA CSS ( CSS / FONTAWESOME )
+     * Devuelve los <link> necesarios para que los bloques tengan estilos.
+     * Debe imprimirse dentro del <head> de la página.
+     *
+     * @param string $bulmaUrl URL del CSS de Bulma
+     * @param bool $fontAwesome Incluir Font Awesome (usado por iconLeft/iconRight/icono)
+     * @return string
+     */
+    public function cssLinks(
+        string $bulmaUrl = "https://cdn.jsdelivr.net/npm/bulma@" . self::BULMA_VERSION . "/css/bulma.min.css",
+        bool $fontAwesome = true
+    ): string {
+        $links = '<link rel="stylesheet" href="' . $bulmaUrl . '">' . PHP_EOL;
+
+        if ($fontAwesome) {
+            $links .= '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">' . PHP_EOL;
+        }
+
+        return $links;
+    }
+
+    /**
+     * BULMA CSS ( DOCUMENTO )
+     * Envuelve un contenido en un documento HTML completo con los estilos ya cargados
+     *
+     * @param string $contenido HTML generado por los helpers
+     * @param string $titulo
+     * @param string $bulmaUrl
+     * @param bool $fontAwesome
+     * @return string
+     */
+    public function page(
+        string $contenido,
+        string $titulo = "Bulma",
+        string $bulmaUrl = "https://cdn.jsdelivr.net/npm/bulma@" . self::BULMA_VERSION . "/css/bulma.min.css",
+        bool $fontAwesome = true
+    ): string {
+        $head = '<meta charset="utf-8">' . PHP_EOL
+            . '<meta name="viewport" content="width=device-width, initial-scale=1">' . PHP_EOL
+            . '<title>' . htmlentities($titulo, ENT_QUOTES) . '</title>' . PHP_EOL
+            . $this->cssLinks($bulmaUrl, $fontAwesome);
+
+        $body = '<div class="section"><div class="container">' . PHP_EOL . $contenido . PHP_EOL . '</div></div>';
+
+        return '<!DOCTYPE html>' . PHP_EOL . '<html lang="es">' . PHP_EOL . '<head>' . PHP_EOL . $head . '</head>' . PHP_EOL
+            . '<body>' . PHP_EOL . $body . PHP_EOL . '</body>' . PHP_EOL . '</html>' . PHP_EOL;
+    }
+
     /**
      * Devuelve el atributo class completo a partir de un array o string
      */
