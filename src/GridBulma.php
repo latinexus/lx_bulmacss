@@ -853,14 +853,18 @@ class GridBulma
      * BULMA CSS ( TABLE )
      * Devuelve una tabla con formato para Bulma CSS
      *
-     * @param $filas
+     * Las celdas pueden ser texto o arrays de atributos:
+     * $g->bul_table([["Ana", ["28", ["class" => "has-text-right"]]]], ["Nombre", "Edad"])
+     *
+     * @param array $filas
      * @param array $encabezados
      * @param bool $striped
      * @param bool $hoverable
      * @param bool $fullwidth
+     * @param array $w opciones de la envoltura ("class", "style", "id")
      * @return string
      */
-    public function bul_table($filas, $encabezados = [], $striped = true, $hoverable = true, $fullwidth = true)
+    public function bul_table($filas, $encabezados = [], $striped = true, $hoverable = true, $fullwidth = true, array $w = [])
     {
         $b = new HtmlTag();
         $clases = ["table"];
@@ -881,29 +885,40 @@ class GridBulma
         if (!empty($encabezados)) {
             $thRow = "";
             foreach ($encabezados as $th) {
-                $thRow .= $b->blk($th, [], "th");
+                [$contenido, $attrs] = $this->celda($th);
+                $thRow .= $b->blk($contenido, $attrs, "th");
             }
-            $thead = $b->blk($thRow, [], "tr");
-            $thead = $b->blk($thead, [], "thead");
+            $thead = $b->blk($b->blk($thRow, [], "tr"), [], "thead");
         }
 
         $tbody = "";
         foreach ($filas as $fila) {
             $tr = "";
-            if (is_array($fila)) {
-                foreach ($fila as $celda) {
-                    $tr .= $b->blk($celda, [], "td");
-                }
-            } else {
-                $tr .= $b->blk($fila, [], "td");
+            foreach ((array) $fila as $celda) {
+                [$contenido, $attrs] = $this->celda($celda);
+                $tr .= $b->blk($contenido, $attrs, "td");
             }
             $tbody .= $b->blk($tr, [], "tr");
         }
         $tbody = $b->blk($tbody, [], "tbody");
 
-        $table = $thead . $tbody;
+        $table = $b->blk($thead . $tbody, ["class" => implode(" ", $clases)], "table");
 
-        return $b->blk($table, ["class" => implode(" ", $clases)]);
+        return $this->wrapField($table, ["nowrap" => false, "w" => $w]);
+    }
+
+    /**
+     * Normaliza una celda de tabla: [contenido, atributos]
+     */
+    private function celda($celda): array
+    {
+        if (is_array($celda) && array_key_exists(0, $celda)) {
+            $contenido = $celda[0];
+            $attrs = is_array($celda[1] ?? null) ? $celda[1] : [];
+            return [$contenido, $attrs];
+        }
+
+        return [is_array($celda) ? "" : $celda, []];
     }
 
     /**
