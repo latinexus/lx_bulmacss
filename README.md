@@ -20,9 +20,9 @@ en el `<head>`:
 O hacerlo desde la clase con `cssLinks()` (también carga Font Awesome para los iconos):
 
 ```php
-use Lib\Grids\GridBulma;
+use Lib\Grids\BulmaCSS;
 
-$bul = new GridBulma();
+$bul = new BulmaCSS();
 
 echo $bul->cssLinks();
 echo $bul->bul_input("Nombre", "nombre");
@@ -99,6 +99,8 @@ También se acepta el formato con claves `["e" => [], "w" => []]`.
 | `bul_tag($texto, $tipo, $tamanio, $rounded, $delete)` | Tag |
 | `bul_progress($valor, $tipo, $tamanio)` | Barra de progreso |
 | `bul_table($filas, $encabezados, ...)` | Tabla |
+| `cssLinks($bulmaUrl, $fontAwesome)` | `<link>` del CSS de Bulma (y Font Awesome) |
+| `page($contenido, $titulo)` | Documento HTML completo |
 
 ## Publicar una nueva versión
 

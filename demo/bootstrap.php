@@ -9,5 +9,5 @@ if (file_exists($autoload)) {
     require $autoload;
 }
 
-require_once __DIR__ . '/../src/GridBulma.php';
+require_once __DIR__ . '/../src/BulmaCSS.php';
 require_once __DIR__ . '/demo-htmltag.php';

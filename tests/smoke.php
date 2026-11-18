@@ -5,9 +5,9 @@
  */
 require __DIR__ . '/../demo/bootstrap.php';
 
-use Lib\Grids\GridBulma;
+use Lib\Grids\BulmaCSS;
 
-$g = new GridBulma();
+$g = new BulmaCSS();
 
 $form = $g->bul_input("Nombre", "nombre", [[
         "required" => true,
@@ -26,7 +26,7 @@ $form = $g->bul_input("Nombre", "nombre", [[
     . $g->bul_radio("Si", "x")
     . $g->bul_button("Guardar", [["icono" => "save", "extra" => 'onclick="return false;" data-x="1"']]);
 
-$contenido = $g->bul_notification("Página de muestra de GridBulma con Bulma CSS cargado.", "is-info", true)
+$contenido = $g->bul_notification("Página de muestra de BulmaCSS con Bulma CSS cargado.", "is-info", true)
     . $g->row(
         $g->col($g->bul_card("Formulario", $form, [["nowrap" => true]]), ["class" => ["is-half"]])
         . $g->col(
@@ -37,4 +37,4 @@ $contenido = $g->bul_notification("Página de muestra de GridBulma con Bulma CSS
         )
     );
 
-echo $g->page($contenido, "GridBulma - smoke test");
+echo $g->page($contenido, "BulmaCSS - smoke test");

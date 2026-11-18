@@ -1,9 +1,9 @@
 <?php
 require __DIR__ . '/bootstrap.php';
 
-use Lib\Grids\GridBulma;
+use Lib\Grids\BulmaCSS;
 
-$g = new GridBulma();
+$g = new BulmaCSS();
 
 $contenido = $g->bul_notification("Todos los componentes se ven con estilos porque page()/cssLinks() cargan Bulma desde el CDN.", "is-success", true);
 

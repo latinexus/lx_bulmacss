@@ -18,14 +18,14 @@ use Latinexus\Html\HtmlTag;
  * From: www.latinex.us
  * Date: 17/11/26
  * Time: 17:50 H
- * Class GridBulma
+ * Class BulmaCSS
  * @package Lib\Grids
  *
  * Lo que se quiere con esta clase es crear desde PHP bloques HTML con estilos de Bulma CSS incluidos
  *
- * $bul = new GridBulma()
+ * $bul = new BulmaCSS()
  *
- * echo $bul->input("Nombre","nombre")
+ * echo $bul->bul_input("Nombre", "nombre")
  *
  * debe generar el siguiente HTML
  * `<div class="field">
@@ -36,7 +36,7 @@ use Latinexus\Html\HtmlTag;
  * </div>`
  *
  */
-class GridBulma
+class BulmaCSS
 {
     public function __construct()
     {
