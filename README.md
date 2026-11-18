@@ -29,7 +29,8 @@ echo $bul->bul_input("Nombre", "nombre");
 ```
 
 Para una página completa con estilos ya incluidos: `echo $bul->page($contenido, "Título");`.
-Demo visual: `php -S localhost:8080 -t demo` y abrir <http://localhost:8080>.
+Demos visuales: `demo/index.php` y `tests/smoke.php` (se abren directo en el navegador, p. ej.
+<http://localhost/cp_bulmacss/tests/smoke.php>).
 
 ```php
 echo $bul->bul_input("Nombre", "nombre");

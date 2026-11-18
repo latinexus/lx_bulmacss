@@ -1,11 +1,5 @@
 <?php
-$autoload = __DIR__ . '/../vendor/autoload.php';
-if (file_exists($autoload)) {
-    require $autoload;
-} else {
-    require __DIR__ . '/../src/GridBulma.php';
-    require __DIR__ . '/demo-htmltag.php';
-}
+require __DIR__ . '/bootstrap.php';
 
 use Lib\Grids\GridBulma;
 
