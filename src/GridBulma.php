@@ -110,6 +110,103 @@ class GridBulma
     }
 
     /**
+     * Normaliza el 3er parámetro de los helpers. Formatos aceptados:
+     *  - ["e" => [], "w" => []]          formato original
+     *  - [["e"], ["w"]]                  primer elemento = elemento, segundo = envoltura
+     *  - [["opciones del elemento"]]     atajo cuando no se usa "nowrap"
+     *
+     * @return array ["e" => [], "w" => [], "nowrap" => bool]
+     */
+    private function resolveDatos($datos = []): array
+    {
+        $datos = is_array($datos) ? $datos : [];
+        $esAtajo = !array_key_exists("e", $datos) && !array_key_exists("w", $datos);
+
+        if ($esAtajo) {
+            $e = is_array($datos[0] ?? null) ? $datos[0] : [];
+            $w = $datos[1] ?? [];
+        } else {
+            $e = is_array($datos["e"] ?? null) ? $datos["e"] : [];
+            $w = $datos["w"] ?? [];
+        }
+
+        $e = is_array($e) ? $e : [];
+        $w = is_array($w) ? $w : [];
+
+        return [
+            "e" => $e,
+            "w" => $w,
+            "nowrap" => !empty($e["nowrap"]) || !empty($w["nowrap"]),
+        ];
+    }
+
+    /**
+     * Genera la etiqueta <label> de un campo
+     */
+    private function labelHtml(string $label): string
+    {
+        if ($label === "") {
+            return "";
+        }
+
+        $b = new HtmlTag();
+
+        return $b->blk($label, ["class" => "label"], "label");
+    }
+
+    /**
+     * Genera el par de <span class="icon"> de los campos con iconos
+     */
+    private function iconHtml(string $posicion, string $icono): string
+    {
+        return '<span class="icon is-small is-' . $posicion . '"><i class="fas fa-' . $icono . '"></i></span>';
+    }
+
+    /**
+     * Envuelve el elemento (label + control + help) en el contenedor.
+     * Con "nowrap" devuelve solo el contenido.
+     * Sin "w" el contenedor es "column" (ocupa todo el ancho disponible);
+     * con "w" la clase es "field" más los modificadores indicados.
+     */
+    private function wrapField(string $contenido, array $info): string
+    {
+        if ($info["nowrap"]) {
+            return $contenido;
+        }
+
+        $w = $info["w"];
+        $class = empty($w) ? "column" : $this->wrapperClass("field", $w["class"] ?? $w);
+
+        $attrs = ["class" => $class];
+
+        if (!empty($w["style"])) {
+            $attrs["style"] = $w["style"];
+        }
+
+        if (!empty($w["id"])) {
+            $attrs["id"] = $w["id"];
+        }
+
+        $b = new HtmlTag();
+
+        return $b->blk($contenido, $attrs);
+    }
+
+    /**
+     * Genera la ayuda inferior del campo (<p class="help ...">)
+     */
+    private function helpHtml(string $help, string $clase): string
+    {
+        if ($help === "") {
+            return "";
+        }
+
+        $b = new HtmlTag();
+
+        return $b->blk($help, ["class" => trim("help " . $clase)], "p");
+    }
+
+    /**
      * Normaliza el valor de "checked" (bool, "checked", 1, etc.)
      */
     private function isChecked($checked): bool
@@ -234,19 +331,26 @@ class GridBulma
      * BULMA CSS ( INPUT )
      * Devuelve un input con formato para Bulma CSS
      *
+     * $g->bul_input("Nombre", "nombre", [["required" => true, "iconLeft" => "user", "placeholder" => "Tu nombre"]])
+     *
+     * Opciones del elemento ("e"):
+     *  type, value, id, class, placeholder, min, max, minlength, maxlength,
+     *  required, readonly, disabled, style, extra, nowrap,
+     *  iconLeft, iconRight, color (is-success, is-danger, ...), help, helpColor,
+     *  classR (color del asterisco de required)
+     *
+     * Opciones de la envoltura ("w"): class / style / id (por defecto "column")
+     *
      * @param $label
      * @param $name
-     * @param array $datos ["e"=>[], "w"=>[]]
+     * @param array $datos [["e"], ["w"]] o ["e"=>[], "w"=>[]]
      * @return string
      */
     public function bul_input($label, $name, $datos = [])
     {
         $b = new HtmlTag();
-        $e = $datos["e"] ?? [];
-        $w = $datos["w"] ?? [];
-
-        $opcionales = ["required", "readonly", "disabled"];
-        $arregloOpciones = [];
+        $info = $this->resolveDatos($datos);
+        $e = $info["e"];
 
         $type = $e["type"] ?? "text";
         $value = $e["value"] ?? "";
@@ -261,70 +365,90 @@ class GridBulma
         $style = $e["style"] ?? "";
         $iconLeft = $e["iconLeft"] ?? "";
         $iconRight = $e["iconRight"] ?? "";
-        $nowrap = $e["nowrap"] ?? false;
+        $color = $e["color"] ?? "";
+        $help = (string) ($e["help"] ?? "");
+        $helpColor = $e["helpColor"] ?? "";
 
-        foreach ($opcionales as $opt) {
-            if (!empty($e[$opt])) {
-                if ($opt == "required") {
-                    $label .= ' <span class="' . $classRequired . '">*</span>';
-                }
-                $arregloOpciones[$opt] = "1";
-            }
+        $required = !empty($e["required"]);
+
+        if ($required) {
+            $label .= ' <span class="' . $classRequired . '">*</span>';
         }
 
-        $clsCss = empty($clase) ? "input" : "input " . $clase;
+        $clases = ["input"];
+        if (!empty($color)) {
+            $clases[] = $color;
+        }
+        if (!empty($clase)) {
+            $clases[] = $clase;
+        }
 
-        $arregloOpciones["id"] = $id;
-        $arregloOpciones["name"] = $name;
-        $arregloOpciones["class"] = $clsCss;
-        $arregloOpciones["value"] = $value;
-        $arregloOpciones["type"] = $type;
-        $arregloOpciones["style"] = $style;
+        $attrs = [
+            "id" => $id,
+            "name" => $name,
+            "class" => implode(" ", $clases),
+            "type" => $type,
+        ];
+
+        if ($value !== "" && $value !== null) {
+            $attrs["value"] = $value;
+        }
 
         if (!empty($placeholder)) {
-            $arregloOpciones["placeholder"] = $placeholder;
+            $attrs["placeholder"] = $placeholder;
+        }
+
+        if (!empty($style)) {
+            $attrs["style"] = $style;
+        }
+
+        if (!empty($e["extra"])) {
+            $attrs = array_merge($attrs, $this->parseExtraAttributes($e["extra"]));
         }
 
         if (!empty($minlength)) {
-            $arregloOpciones["minlength"] = $minlength;
+            $attrs["minlength"] = $minlength;
         }
 
         if (!empty($maxlength)) {
-            $arregloOpciones["maxlength"] = $maxlength;
+            $attrs["maxlength"] = $maxlength;
         }
 
-        if (in_array($arregloOpciones["type"], ["number", "date", "datetime-local", "time", "range"], true)) {
+        if (in_array($type, ["number", "date", "datetime-local", "time", "range"], true)) {
             if (!empty($min)) {
-                $arregloOpciones["min"] = $min;
+                $attrs["min"] = $min;
             }
             if (!empty($max)) {
-                $arregloOpciones["max"] = $max;
+                $attrs["max"] = $max;
             }
         }
 
-        $inputHtml = $b->noBlk($arregloOpciones, "input");
+        foreach (["required", "readonly", "disabled"] as $opt) {
+            if (!empty($e[$opt])) {
+                $attrs[$opt] = "1";
+            }
+        }
 
+        $inputHtml = $b->noBlk($attrs, "input");
+
+        $controlClass = "control";
         if (!empty($iconLeft) || !empty($iconRight)) {
-            $controlContent = "";
-            if (!empty($iconLeft)) {
-                $controlContent .= '<span class="icon is-small is-left"><i class="fas fa-' . $iconLeft . '"></i></span>';
-            }
-            $controlContent .= $inputHtml;
-            if (!empty($iconRight)) {
-                $controlContent .= '<span class="icon is-small is-right"><i class="fas fa-' . $iconRight . '"></i></span>';
-            }
-            $retorno = $b->blk($controlContent, ["class" => "control has-icons"]);
-        } else {
-            $retorno = $b->blk($inputHtml, ["class" => "control"]);
+            $controlClass .= " has-icons-left has-icons-right";
         }
 
-        $retorno = $b->blk($label, ["class" => "label"], "label") . $retorno;
-
-        if ($nowrap) {
-            return $retorno;
+        $controlContent = $inputHtml;
+        if (!empty($iconLeft)) {
+            $controlContent .= $this->iconHtml("left", $iconLeft);
+        }
+        if (!empty($iconRight)) {
+            $controlContent .= $this->iconHtml("right", $iconRight);
         }
 
-        return $b->blk($retorno, ["class" => $this->wrapperClass("field", $w)]);
+        $retorno = $this->labelHtml($label)
+            . $b->blk($controlContent, ["class" => $controlClass])
+            . $this->helpHtml($help, $helpColor);
+
+        return $this->wrapField($retorno, $info);
     }
 
     /**
@@ -333,34 +457,45 @@ class GridBulma
      *
      * @param $label
      * @param $name
-     * @param array $contenido
-     * @param array $datos ["e"=>[], "w"=>[]]
+     * @param array $contenido [valor => texto]
+     * @param array $datos [["e"], ["w"]] o ["e"=>[], "w"=>[]]
      * @return string
      */
     public function bul_select($label, $name, $contenido, $datos = [])
     {
         $b = new HtmlTag();
-        $e = $datos["e"] ?? [];
-        $w = $datos["w"] ?? [];
+        $info = $this->resolveDatos($datos);
+        $e = $info["e"];
 
         $id = $e["id"] ?? $name;
         $selected = $e["selected"] ?? "";
         $placeholder = $e["placeholder"] ?? "Seleccionar";
         $clase = $e["class"] ?? "";
         $style = $e["style"] ?? "";
-        $nowrap = $e["nowrap"] ?? false;
+        $color = $e["color"] ?? "";
+        $help = (string) ($e["help"] ?? "");
+        $helpColor = $e["helpColor"] ?? "";
 
-        $clsCss = empty($clase) ? "input" : "input " . $clase;
-        $selectAttrs = ["name" => $name, "id" => $id, "class" => $clsCss];
+        $clases = ["input"];
+        if (!empty($color)) {
+            $clases[] = $color;
+        }
+        if (!empty($clase)) {
+            $clases[] = $clase;
+        }
+
+        $selectAttrs = ["name" => $name, "id" => $id, "class" => implode(" ", $clases)];
+
         if (!empty($style)) {
             $selectAttrs["style"] = $style;
         }
-        if (!empty($e["required"])) {
-            $selectAttrs["required"] = "1";
+
+        foreach (["required", "readonly", "disabled"] as $opt) {
+            if (!empty($e[$opt])) {
+                $selectAttrs[$opt] = "1";
+            }
         }
-        if (!empty($e["disabled"])) {
-            $selectAttrs["disabled"] = "1";
-        }
+
         if (!empty($e["extra"])) {
             $selectAttrs = array_merge($selectAttrs, $this->parseExtraAttributes($e["extra"]));
         }
@@ -380,15 +515,11 @@ class GridBulma
             $opciones .= '<option value="" disabled selected>Sin elementos</option>' . PHP_EOL;
         }
 
-        $retorno = $b->blk($opciones, $selectAttrs, "select");
-        $retorno = $b->blk($retorno, ["class" => "control"]);
-        $retorno = $b->blk($label, ["class" => "label"], "label") . $retorno;
+        $retorno = $this->labelHtml($label)
+            . $b->blk($b->blk($opciones, $selectAttrs, "select"), ["class" => "control"])
+            . $this->helpHtml($help, $helpColor);
 
-        if ($nowrap) {
-            return $retorno;
-        }
-
-        return $b->blk($retorno, ["class" => $this->wrapperClass("field", $w)]);
+        return $this->wrapField($retorno, $info);
     }
 
     /**
@@ -397,29 +528,41 @@ class GridBulma
      *
      * @param $label
      * @param $name
-     * @param array $datos ["e"=>[], "w"=>[]]
+     * @param array $datos [["e"], ["w"]] o ["e"=>[], "w"=>[]]
      * @return string
      */
     public function bul_textarea($label, $name, $datos = [])
     {
         $b = new HtmlTag();
-        $e = $datos["e"] ?? [];
-        $w = $datos["w"] ?? [];
+        $info = $this->resolveDatos($datos);
+        $e = $info["e"];
 
         $value = $e["value"] ?? "";
         $id = $e["id"] ?? $name;
         $clase = $e["class"] ?? "";
         $placeholder = $e["placeholder"] ?? "";
-        $nowrap = $e["nowrap"] ?? false;
+        $color = $e["color"] ?? "";
+        $help = (string) ($e["help"] ?? "");
+        $helpColor = $e["helpColor"] ?? "";
 
-        $clsCss = empty($clase) ? "textarea" : "textarea " . $clase;
+        $clases = ["textarea"];
+        if (!empty($color)) {
+            $clases[] = $color;
+        }
+        if (!empty($clase)) {
+            $clases[] = $clase;
+        }
 
-        $textareaAttrs = ["id" => $id, "name" => $name, "class" => $clsCss];
+        $textareaAttrs = ["id" => $id, "name" => $name, "class" => implode(" ", $clases)];
+
         if (!empty($placeholder)) {
             $textareaAttrs["placeholder"] = $placeholder;
         }
         if (!empty($e["rows"])) {
             $textareaAttrs["rows"] = $e["rows"];
+        }
+        if (!empty($e["style"])) {
+            $textareaAttrs["style"] = $e["style"];
         }
         foreach (["required", "readonly", "disabled"] as $opt) {
             if (!empty($e[$opt])) {
@@ -427,15 +570,11 @@ class GridBulma
             }
         }
 
-        $retorno = $b->blk($value, $textareaAttrs, "textarea");
-        $retorno = $b->blk($retorno, ["class" => "control"]);
-        $retorno = $b->blk($label, ["class" => "label"], "label") . $retorno;
+        $retorno = $this->labelHtml($label)
+            . $b->blk($b->blk($value, $textareaAttrs, "textarea"), ["class" => "control"])
+            . $this->helpHtml($help, $helpColor);
 
-        if ($nowrap) {
-            return $retorno;
-        }
-
-        return $b->blk($retorno, ["class" => $this->wrapperClass("field", $w)]);
+        return $this->wrapField($retorno, $info);
     }
 
     /**
@@ -444,19 +583,18 @@ class GridBulma
      *
      * @param $label
      * @param $name
-     * @param array $datos ["e"=>[], "w"=>[]]
+     * @param array $datos [["e"], ["w"]] o ["e"=>[], "w"=>[]]
      * @return string
      */
     public function bul_check($label, $name, $datos = [])
     {
         $b = new HtmlTag();
-        $e = $datos["e"] ?? [];
-        $w = $datos["w"] ?? [];
+        $info = $this->resolveDatos($datos);
+        $e = $info["e"];
 
         $value = $e["value"] ?? 1;
         $id = $e["id"] ?? $name;
         $checked = $e["checked"] ?? false;
-        $nowrap = $e["nowrap"] ?? false;
 
         $params = ["name" => $name, "id" => $id, "type" => "checkbox", "value" => $value];
         if ($this->isChecked($checked)) {
@@ -471,13 +609,7 @@ class GridBulma
         $inp = $b->noBlk($params, "input");
         $lab = $b->blk($inp . ' ' . $label, ["for" => $id], "label");
 
-        $retorno = $b->blk($lab, ["class" => "control"]);
-
-        if ($nowrap) {
-            return $retorno;
-        }
-
-        return $b->blk($retorno, ["class" => $this->wrapperClass("field", $w)]);
+        return $this->wrapField($b->blk($lab, ["class" => "control"]), $info);
     }
 
     /**
@@ -486,19 +618,18 @@ class GridBulma
      *
      * @param $label
      * @param $name
-     * @param array $datos ["e"=>[], "w"=>[]]
+     * @param array $datos [["e"], ["w"]] o ["e"=>[], "w"=>[]]
      * @return string
      */
     public function bul_radio($label, $name, $datos = [])
     {
         $b = new HtmlTag();
-        $e = $datos["e"] ?? [];
-        $w = $datos["w"] ?? [];
+        $info = $this->resolveDatos($datos);
+        $e = $info["e"];
 
         $value = $e["value"] ?? "1";
         $id = $e["id"] ?? $name . uniqid();
         $checked = $e["checked"] ?? false;
-        $nowrap = $e["nowrap"] ?? false;
 
         $params = ["name" => $name, "id" => $id, "type" => "radio", "value" => $value];
         if ($this->isChecked($checked)) {
@@ -513,13 +644,7 @@ class GridBulma
         $inp = $b->noBlk($params, "input");
         $lab = $b->blk($inp . ' ' . $label, ["for" => $id], "label");
 
-        $retorno = $b->blk($lab, ["class" => "control"]);
-
-        if ($nowrap) {
-            return $retorno;
-        }
-
-        return $b->blk($retorno, ["class" => $this->wrapperClass("field", $w)]);
+        return $this->wrapField($b->blk($lab, ["class" => "control"]), $info);
     }
 
     /**
@@ -528,14 +653,15 @@ class GridBulma
      *
      * @param $titulo
      * @param $contenido
-     * @param array $datos ["e"=>[], "w"=>[]]
+     * @param array $datos [["e"], ["w"]] o ["e"=>[], "w"=>[]]
      * @return string
      */
     public function bul_card($titulo, $contenido, $datos = [])
     {
         $b = new HtmlTag();
-        $e = $datos["e"] ?? [];
-        $w = $datos["w"] ?? [];
+        $info = $this->resolveDatos($datos);
+        $e = $info["e"];
+        $w = $info["w"];
 
         $imagen = $e["imagen"] ?? "";
         $alt = $e["alt"] ?? "";
@@ -543,21 +669,34 @@ class GridBulma
         $cardContent = "";
 
         if (!empty($imagen)) {
-            $imgPath = $imagen;
-            $imagenUrl = $this->resolveVistaUrl(['vista' => $imgPath]);
+            $imagenUrl = $this->resolveVistaUrl(['vista' => $imagen]);
             $i = '<img src="' . $imagenUrl . '" ' . $this->altImg($alt) . ' />';
             $cardContent .= $b->blk($i, ["class" => "card-image"]);
         }
 
+        $cuerpo = "";
+
         if (!empty($titulo)) {
-            $title = $b->blk($titulo, ["class" => "title is-4"], "p");
-            $cardContent .= $title;
+            $cuerpo .= $b->blk($titulo, ["class" => "title is-4"], "p");
         }
 
-        $cardContent .= $b->blk($contenido, ["class" => "content"]);
+        $cuerpo .= $b->blk($contenido, ["class" => "content"]);
+        $cardContent .= $b->blk($cuerpo, ["class" => "card-content"]);
 
-        $cardClass = !empty($w) ? "card " . implode(" ", $w) : "card";
-        return $b->blk($cardContent, ["class" => $cardClass]);
+        if ($info["nowrap"]) {
+            return $cardContent;
+        }
+
+        $cardAttrs = ["class" => $this->wrapperClass("card", $w["class"] ?? $w)];
+
+        if (!empty($w["style"])) {
+            $cardAttrs["style"] = $w["style"];
+        }
+        if (!empty($w["id"])) {
+            $cardAttrs["id"] = $w["id"];
+        }
+
+        return $b->blk($cardContent, $cardAttrs);
     }
 
     /**
@@ -565,14 +704,14 @@ class GridBulma
      * Devuelve un botón con formato para Bulma CSS
      *
      * @param $texto
-     * @param array $datos ["e"=>[], "w"=>[]]
+     * @param array $datos [["e"], ["w"]] o ["e"=>[], "w"=>[]]
      * @return string
      */
     public function bul_button($texto, $datos = [])
     {
         $b = new HtmlTag();
-        $e = $datos["e"] ?? [];
-        $w = $datos["w"] ?? [];
+        $info = $this->resolveDatos($datos);
+        $e = $info["e"];
 
         $tipo = $e["tipo"] ?? "is-primary";
         $tamanio = $e["tamanio"] ?? "";

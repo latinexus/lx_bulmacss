@@ -45,10 +45,41 @@ echo $bul->bul_input("Nombre", "nombre");
 </div>
 ```
 
-Todos los helpers aceptan un array `$datos` con dos claves:
+Los helpers generan su propio contenedor, así que no hace falta envolverlos en `col()`.
+El tercer parámetro `$datos` siempre es un array con dos elementos:
 
-* `e` — opciones del elemento: `value`, `id`, `class`, `placeholder`, `type`, `required`, `readonly`, `disabled`, `iconLeft`, `iconRight`, `nowrap`, `min`, `max`, `minlength`, `maxlength`, etc.
-* `w` — clases extra del envoltorio (`field`), por ejemplo `"w" => ["is-grouped"]`.
+* `[0]` — opciones del elemento (input, select, textarea...): `value`, `id`, `class`, `placeholder`, `type`,
+  `required`, `readonly`, `disabled`, `iconLeft`, `iconRight`, `color` (`is-success`, `is-danger`...),
+  `help`, `helpColor`, `nowrap`, `min`, `max`, `minlength`, `maxlength`, etc.
+* `[1]` — opciones de la envoltura: `class`, `style`, `id` o `nowrap`.
+
+Si no se indica la envoltura, el contenedor es `column` y ocupa todo el ancho disponible;
+si se indica, el contenedor pasa a ser `field` con los modificadores dados.
+
+```php
+// column (todo el ancho)
+$g->bul_input("Nombre", "nombre", [["required" => true, "iconLeft" => "user", "placeholder" => "Tu nombre"]]);
+
+// field is-four-fifths (dentro de un row())
+$g->bul_input("Nombre", "nombre", [["required" => true], ["class" => "is-four-fifths"]]);
+
+// sin contenedor
+$g->bul_input("Nombre", "nombre", [["nowrap" => true]]);
+```
+
+Genera:
+
+```html
+<div class="column">
+  <label class="label">Nombre <span class="has-text-danger">*</span></label>
+  <div class="control has-icons-left has-icons-right">
+    <input id="nombre" name="nombre" class="input" type="text" placeholder="Tu nombre" required />
+    <span class="icon is-small is-left"><i class="fas fa-user"></i></span>
+  </div>
+</div>
+```
+
+También se acepta el formato con claves `["e" => [], "w" => []]`.
 
 ## Componentes disponibles
 

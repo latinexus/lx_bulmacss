@@ -29,7 +29,7 @@ if (!class_exists(HtmlTag::class, false)) {
                 } elseif (in_array($opId, self::BOOLEAN, true)) {
                     $blk[$opId] = $opId;
                 } elseif ($op !== "" && $op !== null) {
-                    $blk[$opId] = $opId . '="' . htmlentities((string) $op, ENT_QUOTES) . '"';
+                    $blk[$opId] = $opId . '="' . (string) $op . '"';
                 }
             }
 

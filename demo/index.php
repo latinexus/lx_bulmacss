@@ -8,7 +8,7 @@ $g = new GridBulma();
 $contenido = $g->bul_notification("Todos los componentes se ven con estilos porque page()/cssLinks() cargan Bulma desde el CDN.", "is-success", true);
 
 $contenido .= $g->row(
-    $g->col($g->bul_input("Nombre", "nombre", ["e" => ["required" => true, "iconLeft" => "user", "placeholder" => "Tu nombre"]]))
+    $g->col($g->bul_input("Nombre", "nombre", [["required" => true, "iconLeft" => "user", "placeholder" => "Tu nombre"]]))
     . $g->col($g->bul_input("Correo", "correo", ["e" => ["type" => "email", "iconLeft" => "envelope"]]))
 );
 
@@ -43,3 +43,9 @@ $contenido .= $g->bul_card(
 );
 
 echo $g->page($contenido, "Demo lx_bulmacss");
+
+
+
+
+
+
