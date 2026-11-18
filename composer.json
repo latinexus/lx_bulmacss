@@ -1,8 +1,16 @@
 {
     "name": "latinexus/lx_bulmacss",
-    "description": "Constructor de bloques HTML con estilos Bulma CSS desde PHP",
+    "description": "Constructor de bloques HTML con estilos de Bulma CSS desde PHP",
     "type": "library",
     "license": "MIT",
+    "homepage": "https://latinex.us",
+    "keywords": [
+        "bulma",
+        "bulma css",
+        "html",
+        "form",
+        "components"
+    ],
     "authors": [
         {
             "name": "Eric Larrea",
@@ -18,5 +26,13 @@
             "Lib\\Grids\\": "src/"
         }
     },
-    "minimum-stability": "stable"
+    "scripts": {
+        "test": "@php tests/smoke.php > /dev/null"
+    },
+    "support": {
+        "source": "https://github.com/latinexus/lx_bulmacss",
+        "issues": "https://github.com/latinexus/lx_bulmacss/issues"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

@@ -100,6 +100,19 @@ También se acepta el formato con claves `["e" => [], "w" => []]`.
 | `bul_progress($valor, $tipo, $tamanio)` | Barra de progreso |
 | `bul_table($filas, $encabezados, ...)` | Tabla |
 
+## Publicar una nueva versión
+
+```bash
+# subir cambios
+git add -A && git commit -m "..." && git push
+
+# crear y subir la etiqueta (Packagist la detecta automáticamente)
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+Packagist toma la versión del nombre del tag (`v1.0.1` → `1.0.1`).
+
 ## Licencia
 
 MIT
