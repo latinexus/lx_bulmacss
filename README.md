@@ -82,6 +82,15 @@ Genera:
 
 También se acepta el formato con claves `["e" => [], "w" => []]`.
 
+### Assets locales
+
+Este paquete no incluye el CSS de Bulma. Copia `bulma.min.css` (v1.0.4) en
+`public/css/bulma.min.css` del proyecto donde lo uses, o pasa otra ruta a
+`cssLinks()` / `page()`. Si usas los iconos (`iconLeft`, `iconRight`, `icono`),
+publica también Font Awesome en `public/css/font-awesome/all.min.css` e indica
+`cssLinks(BulmaCSS::BULMA_CSS, true)`.
+
+
 ## Componentes disponibles
 
 | Método | Descripción |
