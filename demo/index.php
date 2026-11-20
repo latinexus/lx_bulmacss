@@ -5,7 +5,7 @@ use Lib\Grids\BulmaCSS;
 
 $g = new BulmaCSS();
 
-$contenido = $g->bul_notification("Todos los componentes se ven con estilos porque page()/cssLinks() cargan Bulma desde el CDN.", "is-success", true);
+$contenido = $g->bul_notification("Todos los componentes se ven con estilos porque page()/cssLinks() cargan Bulma desde los assets locales.", "is-success", true);
 
 $contenido .= $g->row(
     $g->col($g->bul_input("Nombre", "nombre", [["required" => true, "iconLeft" => "user", "placeholder" => "Tu nombre"]]))

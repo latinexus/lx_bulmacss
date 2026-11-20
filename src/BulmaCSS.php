@@ -47,22 +47,35 @@ class BulmaCSS
     public const BULMA_VERSION = "1.0.4";
 
     /**
+     * Hoja de estilos local, servida por la propia aplicación.
+     * No se permiten CDNs externos: todo el CSS y JS vive en el servidor.
+     */
+    public const BULMA_CSS = "public/css/bulma.min.css";
+
+    /**
+     * Font Awesome sólo si el paquete se publica localmente en esta ruta.
+     * La aplicación usa Material Icons (public/css/icon.css), por eso no se
+     * carga por defecto.
+     */
+    public const FONTAWESOME_CSS = "public/css/font-awesome/all.min.css";
+
+    /**
      * BULMA CSS ( CSS / FONTAWESOME )
      * Devuelve los <link> necesarios para que los bloques tengan estilos.
      * Debe imprimirse dentro del <head> de la página.
      *
-     * @param string $bulmaUrl URL del CSS de Bulma
-     * @param bool $fontAwesome Incluir Font Awesome (usado por iconLeft/iconRight/icono)
+     * @param string $bulmaUrl Ruta del CSS de Bulma, relativa al dominio
+     * @param bool $fontAwesome Incluir Font Awesome local (usado por iconLeft/iconRight/icono)
      * @return string
      */
     public function cssLinks(
-        string $bulmaUrl = "https://cdn.jsdelivr.net/npm/bulma@" . self::BULMA_VERSION . "/css/bulma.min.css",
-        bool $fontAwesome = true
+        string $bulmaUrl = self::BULMA_CSS,
+        bool $fontAwesome = false
     ): string {
         $links = '<link rel="stylesheet" href="' . $bulmaUrl . '">' . PHP_EOL;
 
         if ($fontAwesome) {
-            $links .= '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">' . PHP_EOL;
+            $links .= '<link rel="stylesheet" href="' . self::FONTAWESOME_CSS . '">' . PHP_EOL;
         }
 
         return $links;
@@ -81,8 +94,8 @@ class BulmaCSS
     public function page(
         string $contenido,
         string $titulo = "Bulma",
-        string $bulmaUrl = "https://cdn.jsdelivr.net/npm/bulma@" . self::BULMA_VERSION . "/css/bulma.min.css",
-        bool $fontAwesome = true
+        string $bulmaUrl = self::BULMA_CSS,
+        bool $fontAwesome = false
     ): string {
         $head = '<meta charset="utf-8">' . PHP_EOL
             . '<meta name="viewport" content="width=device-width, initial-scale=1">' . PHP_EOL

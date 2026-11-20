@@ -14,10 +14,11 @@ Los helpers solo generan el HTML con las clases de Bulma; para que se vean los e
 en el `<head>`:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+<link rel="stylesheet" href="public/css/bulma.min.css">
 ```
 
-O hacerlo desde la clase con `cssLinks()` (también carga Font Awesome para los iconos):
+O hacerlo desde la clase con `cssLinks()`. Los assets son locales: no se usan CDNs externos.
+Font Awesome es opcional y debe publicarse en `public/css/font-awesome/all.min.css`:
 
 ```php
 use Lib\Grids\BulmaCSS;
